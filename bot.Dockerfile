@@ -6,6 +6,10 @@ RUN npm install -g n8n
 
 WORKDIR /app
 
+# Installe les dépendances du projet
+COPY package*.json ./
+RUN npm install --omit=dev
+
 # Copie tout le code
 COPY . .
 
