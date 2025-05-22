@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: n8n-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: n8n
+      POSTGRES_PASSWORD: root # Changez ceci pour un mot de passe plus sécurisé en production
+      POSTGRES_DB: n8nDB
+    volumes:
+      - n8n_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432" # Optionnel: pour accéder à la DB depuis votre machine hôte si besoin
+
+  n8n:
+    image: n8nio/n8n
+    container_name: n8n-service
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres # Nom du service postgres défini ci-dessus
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8nDB
+      - DB_POSTGRESDB_USER=n8n
+      - DB_POSTGRESDB_PASSWORD=root # Doit correspondre au mot de passe de postgres
+      - GENERIC_TIMEZONE=Europe/Paris # Ajustez à votre fuseau horaire
+      - N8N_HOST=0.0.0.0
+      - WEBHOOK_URL=http://localhost:5678 # Ou l'URL publique si exposé via ngrok/autre
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      - postgres
+
+  discord-bot:
+    build:
+      context: . # Le répertoire actuel où se trouve bot.Dockerfile
+      dockerfile: bot.Dockerfile
+    container_name: discord-bot-service
+    restart: unless-stopped
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN} # Sera pris depuis le fichier .env
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/discord-bot # 'n8n' est le nom du service n8n
+      - TARGET_CHANNEL_ID=${TARGET_CHANNEL_ID} # Sera pris depuis le fichier .env (si défini et non commenté)
+    depends_on:
+      - n8n
+
+volumes:
+  n8n_pgdata:
+  n8n_data:
