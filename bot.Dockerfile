@@ -1,10 +1,13 @@
-# Utilise l'image officielle n8n
-FROM n8nio/n8n
+# Utilise l'image officielle Node.js légère
+FROM node:22-alpine
 
-# Copie tout le code dans /data
-COPY . /data/
+# Installe n8n globalement
+RUN npm install -g n8n
 
-WORKDIR /data
+WORKDIR /app
+
+# Copie tout le code
+COPY . .
 
 EXPOSE 5678
 
