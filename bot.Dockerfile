@@ -1,5 +1,5 @@
-# Choisir une image Node.js de base (Alpine est légère)
-FROM node:22-alpine
+# Utilise l'image officielle n8n
+FROM n8nio/n8n
 
 # Définir le répertoire de travail dans le conteneur
 WORKDIR /usr/src/app
@@ -14,5 +14,11 @@ RUN npm install --omit=dev
 # Copier le reste du code de l'application
 COPY . .
 
+# Rends le script exécutable
+RUN chmod +x /data/start.sh
+
+# Expose le port n8n
+EXPOSE 5678
+
 # La commande pour lancer votre bot
-CMD [ "node", "index.js" ]
+CMD ["/data/start.sh"]

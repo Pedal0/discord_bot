@@ -1,6 +1,7 @@
 require("dotenv").config();
 const { Client, GatewayIntentBits } = require("discord.js");
 const axios = require("axios");
+const express = require("express");
 
 const token = process.env.DISCORD_BOT_TOKEN;
 const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
@@ -217,6 +218,16 @@ client.on("messageCreate", async (message) => {
       console.error("Error setting up request:", error.message);
     }
   }
+});
+
+// Express server to keep Render happy
+const app = express();
+const PORT = process.env.PORT || 3000;
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+app.listen(PORT, () => {
+  console.log(`Express server listening on port ${PORT}`);
 });
 
 // Log in the bot
